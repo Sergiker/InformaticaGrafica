@@ -1,0 +1,16 @@
+﻿  render_prims.cpp
+d:\data\universitat\3er any\informàtica gràfica\cube\glframework_starthere\code\src\render_prims.cpp(1): fatal error C1083: No se puede abrir el archivo incluir: 'GL\glew.h': No such file or directory
+  render.cpp
+d:\data\universitat\3er any\informàtica gràfica\cube\glframework_starthere\code\src\render.cpp(1): fatal error C1083: No se puede abrir el archivo incluir: 'GL\glew.h': No such file or directory
+  physics.cpp
+d:\data\universitat\3er any\informàtica gràfica\cube\glframework_starthere\code\src\physics.cpp(1): fatal error C1083: No se puede abrir el archivo incluir: 'imgui\imgui.h': No such file or directory
+  main.cpp
+d:\data\universitat\3er any\informàtica gràfica\cube\glframework_starthere\code\src\main.cpp(2): fatal error C1083: No se puede abrir el archivo incluir: 'GL\glew.h': No such file or directory
+  my_render_code.cpp
+d:\data\universitat\3er any\informàtica gràfica\cube\glframework_starthere\code\my_render_code.cpp(2): fatal error C1083: No se puede abrir el archivo incluir: 'GL\glew.h': No such file or directory
+  imgui_impl_sdl_gl3.cpp
+d:\data\universitat\3er any\informàtica gràfica\cube\glframework_starthere\code\include\imgui\imgui_impl_sdl_gl3.cpp(15): fatal error C1083: No se puede abrir el archivo incluir: 'SDL.h': No such file or directory
+  imgui_draw.cpp
+  imgui_demo.cpp
+  imgui.cpp
+  Generando código...

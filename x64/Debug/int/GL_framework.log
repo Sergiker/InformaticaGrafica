@@ -1,0 +1,3 @@
+﻿  render.cpp
+d:\data\universitat\3er any\informàtica gràfica\cube\glframework_starthere\informaticagrafica\code\src\render.cpp(155): warning C4244: '=': conversión de 'double' a 'float'; posible pérdida de datos
+  GL_framework.vcxproj -> D:\DATA\Universitat\3er Any\Informàtica gràfica\Cube\glframework_starthere\InformaticaGrafica\x64\Debug\GL_framework.exe
