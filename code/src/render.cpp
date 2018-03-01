@@ -141,9 +141,13 @@ void GLrender(double currentTime) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	RV::_modelView = glm::mat4(1.f);
-	RV::_modelView = glm::translate(RV::_modelView, glm::vec3(RV::panv[0], RV::panv[1], RV::panv[2]));
-	RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
-	RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
+
+	//RV::_modelView = glm::translate(RV::_modelView, glm::vec3(RV::panv[0], RV::panv[1], RV::panv[2]));
+	//RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
+	//RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
+
+	//LOOK AT
+	RV::_modelView = glm::lookAt(glm::vec3(0.0f, 2.0f, 10.0f), glm::vec3(mov, 0.f, 0.f), glm::vec3(0.2f, 1.0f, 0.3f));
 
 	RV::_MVP = RV::_projection * RV::_modelView;
 
@@ -152,7 +156,7 @@ void GLrender(double currentTime) {
 	Axis::drawAxis();
 	//Cube::drawCube();
 
-	//RV::rota[0] = mov;
+	//RV::rota[0] = -mov;
 	//RV::panv[0] = -mov;
 	//RV::panv[2] += glm::cos(currentTime)*0.05f;
 	//std::cout << initialRotZ << std::endl;
@@ -1032,15 +1036,20 @@ void main() {\n\
 		if (angle >= 360)
 			angle = 0;
 
-		if (mov >= 3)
+		if (mov >= 16)
 			mov = 0;
 
-		t = glm::translate(glm::mat4(), glm::vec3(-1.0f, 0.0f, 0.0f));
+
+		t = glm::translate(glm::mat4(), glm::vec3(0.0f, 3.0f, 0.0f));
 		glm::mat4 esc = glm::scale(glm::mat4(), glm::vec3(yaxis + 2.f, yaxis + 2.f, yaxis + 2.f));
 		glm::mat4 rot = glm::rotate(glm::mat4(), angle, glm::vec3(0.f, 1.f, 0.f));
 		glm::mat4 t2 = glm::translate(glm::mat4(), glm::vec3(yaxis*2 + 2, yaxis*2 + 2, yaxis*2 + 2));
-		glm::mat4 tmov = glm::translate(glm::mat4(), glm::vec3(mov, 0.f, 0.f));
-		objMat = t * t2 * rot /** t2 * esc*/;
+		glm::mat4 tmov = glm::translate(glm::mat4(), glm::vec3(mov*3, 0.f, 0.f));
+
+		
+
+		objMat = t * tmov /* rot * t2 * esc*/;
+
 
 		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 		glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
