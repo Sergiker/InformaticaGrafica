@@ -6,5 +6,3 @@
 #include <cassert>
 
 #include "GL_framework.h"
-
-

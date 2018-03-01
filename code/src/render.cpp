@@ -8,6 +8,7 @@
 #include "GL_framework.h"
 
 float angle = 0;
+float mov = 0;
 
 ///////// fw decl
 namespace ImGui {
@@ -111,8 +112,8 @@ void GLinit(int width, int height) {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
-	//RV::_projection = glm::perspective(RV::FOV, (float)width / (float)height, RV::zNear, RV::zFar);
-	RV::_projection = glm::ortho(-10.f, 10.0f, -10.f, 10.0f, RV::zNear, RV::zFar);
+	RV::_projection = glm::perspective(RV::FOV, (float)width / (float)height, RV::zNear, RV::zFar);
+	//RV::_projection = glm::ortho(-10.f, 10.0f, -10.f, 10.0f, RV::zNear, RV::zFar);
 
 	// Setup shaders & geometry
 	Box::setupCube();
@@ -151,8 +152,8 @@ void GLrender(double currentTime) {
 	Axis::drawAxis();
 	//Cube::drawCube();
 
-	//RV::rota[0] = glm::cos(currentTime)*1.0f;
-	RV::panv[0] = glm::cos(currentTime)*10.0f;
+	//RV::rota[0] = mov;
+	//RV::panv[0] = -mov;
 	//RV::panv[2] += glm::cos(currentTime)*0.05f;
 	//std::cout << initialRotZ << std::endl;
 	
@@ -1026,13 +1027,20 @@ void main() {\n\
 
 		glUniform4f(glGetUniformLocation(cubeProgram, "color"), yaxis, 0.f, 0.f, 0.f);
 		angle += 0.3f;
-		if (angle == 360)
+		mov += 0.1f;
+
+		if (angle >= 360)
 			angle = 0;
+
+		if (mov >= 3)
+			mov = 0;
+
 		t = glm::translate(glm::mat4(), glm::vec3(-1.0f, 0.0f, 0.0f));
 		glm::mat4 esc = glm::scale(glm::mat4(), glm::vec3(yaxis + 2.f, yaxis + 2.f, yaxis + 2.f));
 		glm::mat4 rot = glm::rotate(glm::mat4(), angle, glm::vec3(0.f, 1.f, 0.f));
-		glm::mat4 t2 = glm::translate(glm::mat4(), glm::vec3(1.0f, yaxis + 2, 3.0f));
-		objMat = t * rot * t2 * esc;
+		glm::mat4 t2 = glm::translate(glm::mat4(), glm::vec3(yaxis*2 + 2, yaxis*2 + 2, yaxis*2 + 2));
+		glm::mat4 tmov = glm::translate(glm::mat4(), glm::vec3(mov, 0.f, 0.f));
+		objMat = t * t2 * rot /** t2 * esc*/;
 
 		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 		glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);

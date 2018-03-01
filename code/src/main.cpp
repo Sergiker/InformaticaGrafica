@@ -21,8 +21,8 @@ extern void GLrender(double currentTime);
 
 
 extern void myRenderCode(double currentTime);
-//extern void myCleanupCode(void);
-//extern void myInitCode(void);
+extern void myCleanupCode(void);
+extern void myInitCode(void);
 
 //////
 namespace {
