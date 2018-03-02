@@ -3,12 +3,17 @@
 #include <glm\gtc\matrix_transform.hpp>
 #include <cstdio>
 #include <iostream>
+#include <SDL.h>
 #include <cassert>
 #include "GL_framework.h"
 
+float travelling = 0;
+extern int e;
 float angle = 0;
 float mov = 0;
+float initialRotZ;
 
+SDL_Event event;
 
 namespace ImGui {
 	void Render();
@@ -100,7 +105,7 @@ void GLmousecb(MouseEvent ev) {
 	RV::prevMouse.lasty = ev.posy;
 }
 
-float initialRotZ;
+
 void GLinit(int width, int height) {
 	glViewport(0, 0, width, height);
 	glClearColor(0.2f, 0.2f, 0.2f, 1.f);
@@ -109,29 +114,58 @@ void GLinit(int width, int height) {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
-	RV::_projection = glm::perspective(RV::FOV, (float)width / (float)height, RV::zNear, RV::zFar);
-	//RV::_projection = glm::ortho(-10.f, 10.0f, -10.f, 10.0f, RV::zNear, RV::zFar);
-
 	Box::setupCube();
 	Axis::setupAxis();
 	Cube::setupCube();
 	initialRotZ = RV::rota[2];
-
 }
 
 void GLcleanup() {
 	Cube::cleanupCube();
 }
 
-void GLrender(double currentTime) {
+void GLrender(double currentTime, int width, int height) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	RV::_modelView = glm::mat4(1.f);
-	RV::_modelView = glm::translate(RV::_modelView, glm::vec3(RV::panv[0], RV::panv[1], RV::panv[2]));
-	RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
-	RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
+
+	travelling = float(sin(currentTime));
+
+	//ESCOLLIR EXERCICI
+
+	switch (e)
+	{
+		case 1:
+			RV::_modelView = glm::mat4(1.f);
+			RV::_modelView = glm::translate(RV::_modelView, glm::vec3(travelling * 4, RV::panv[1], RV::panv[2]));
+			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
+			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
+			RV::_projection = glm::ortho(-10.f, 10.0f, -10.f, 10.0f, RV::zNear, RV::zFar);
+			break;
+
+		case 2:
+			RV::_modelView = glm::mat4(1.f);
+			RV::_modelView = glm::translate(RV::_modelView, glm::vec3(RV::panv[0], RV::panv[1]+3, (travelling * 4) - 10));
+			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
+			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
+			RV::_projection = glm::perspective(RV::FOV, (float)width / (float)height, RV::zNear, RV::zFar);
+			break;
+
+		case 3:
+			RV::_modelView = glm::mat4(1.f);
+			RV::_modelView = glm::translate(RV::_modelView, glm::vec3(RV::panv[0], RV::panv[1], RV::panv[2]));
+			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
+			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
+			RV::_projection = glm::perspective(RV::FOV + travelling/2, (float)width / (float)height, RV::zNear, RV::zFar);
+			break;
+
+		case 4:
+			//Dolly effect inverse
+			break;
+	}
+
 
 	//LOOK AT
 	//RV::_modelView = glm::lookAt(glm::vec3(0.0f, 2.0f, 10.0f), glm::vec3(mov, 0.f, 0.f), glm::vec3(0.2f, 1.0f, 0.3f));
+
 
 	RV::_MVP = RV::_projection * RV::_modelView;
 
@@ -518,15 +552,13 @@ void main() {\n\
 		glBindVertexArray(cubeVao);
 		glUseProgram(cubeProgram);
 
-		float yaxis = float(sin(currentTime));
+		glm::mat4 t;
+		glm::mat4 scale;
 
 		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
 		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 		glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 		glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.0f, 0.f, 0.f, 1.f);
-
-		glm::mat4 t;
-		glm::mat4 scale;
 
 		//EDIFICI 1
 		{
@@ -646,7 +678,7 @@ void main() {\n\
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 		}
 
-		//FABRICA 1
+		//FÀBRICA
 		{
 			//BLOC 1
 			t = glm::translate(glm::mat4(), glm::vec3(-3.0f, 1.2f, -0.5f));
@@ -656,8 +688,16 @@ void main() {\n\
 			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
+			//FINESTRA 1
+			t = glm::translate(glm::mat4(), glm::vec3(-3.0f, 1.3f, 0.25f));
+			scale = glm::scale(glm::mat4(), glm::vec3(3.f, 1.f, 1.f));
+			objMat = t * scale;
+			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.5f, 0.5f, 1.f, 1.f);
+			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
 			//XEMENEIA 1
-			t = glm::translate(glm::mat4(), glm::vec3(-4.0f, 3.5f, -0.7f));
+			t = glm::translate(glm::mat4(), glm::vec3(-4.0f, 3.f, -0.7f));
 			scale = glm::scale(glm::mat4(), glm::vec3(1.f, 2.f, 1.f));
 			objMat = t * scale;
 			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.25f, 0.25f, 0.5f, 1.f);
@@ -673,27 +713,48 @@ void main() {\n\
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 		}
 
-		angle += 0.3f;
-		mov += 0.1f;
+		//NÚVOLS
+		{
+			//NÚVOL 1
+			t = glm::translate(glm::mat4(), glm::vec3(-3.0f, 8.2f, -2.5f));
+			scale = glm::scale(glm::mat4(), glm::vec3(2.f, 1.f, 1.f));
+			objMat = t * scale;
+			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 1.f, 1.f, 1.f);
+			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
-		if (angle >= 360)
-			angle = 0;
+			//NÚVOL 2
+			t = glm::translate(glm::mat4(), glm::vec3(1.0f, 7.2f, 0.f));
+			scale = glm::scale(glm::mat4(), glm::vec3(2.f, 1.f, 1.f));
+			objMat = t * scale;
+			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 1.f, 1.f, 1.f);
+			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
-		if (mov >= 16)
-			mov = 0;
+			//NÚVOL 3
+			t = glm::translate(glm::mat4(), glm::vec3(4.0f, 7.5f, -5.f));
+			scale = glm::scale(glm::mat4(), glm::vec3(2.f, 1.f, 1.f));
+			objMat = t * scale;
+			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 1.f, 1.f, 1.f);
+			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+		}
 
 		//CUBE_UNIQUE
-		glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.5f, 0.5f, 1.f, 1.f);
-		t = glm::translate(glm::mat4(), glm::vec3(0.0f, 3.0f, 0.0f));
-		glm::mat4 esc = glm::scale(glm::mat4(), glm::vec3(yaxis + 2.f, yaxis + 2.f, yaxis + 2.f));
+		{
+		glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.15f, 1.f, 0.15f, 1.f);
+		t = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.5f, 3.30f));
+		/*glm::mat4 esc = glm::scale(glm::mat4(), glm::vec3(yaxis + 2.f, yaxis + 2.f, yaxis + 2.f));
 		glm::mat4 rot = glm::rotate(glm::mat4(), angle, glm::vec3(0.f, 1.f, 0.f));
 		glm::mat4 t2 = glm::translate(glm::mat4(), glm::vec3(yaxis * 2 + 2, yaxis * 2 + 2, yaxis * 2 + 2));
-		glm::mat4 tmov = glm::translate(glm::mat4(), glm::vec3(mov * 3, 0.f, 0.f));
+		glm::mat4 tmov = glm::translate(glm::mat4(), glm::vec3(mov * 3, 0.f, 0.f));*/
 
 		objMat = t /** tmov * rot * t2 * esc*/;
 
 		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 		glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+		}
 
 		glUseProgram(0);
 		glBindVertexArray(0);

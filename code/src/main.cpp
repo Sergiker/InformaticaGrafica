@@ -7,7 +7,6 @@
 
 #include "GL_framework.h"
 
-
 /*extern void PhysicsInit();
 extern void PhysicsUpdate(float dt);
 extern void PhysicsCleanup();*/
@@ -17,7 +16,7 @@ extern void GLmousecb(MouseEvent ev);
 extern void GLResize(int width, int height);
 extern void GLinit(int width, int height);
 extern void GLcleanup();
-extern void GLrender(double currentTime);
+extern void GLrender(double currentTime, int width, int height);
 
 
 /*extern void myRenderCode(double currentTime);
@@ -132,7 +131,7 @@ int main(int argc, char** argv) {
 
 
 		double currentTime = (double)SDL_GetTicks() / 1000.0;
-		GLrender(currentTime);
+		GLrender(currentTime, display_w, display_h);
 		
 		//double currentTime = (double) SDL_GetTicks() / 1000.0;
 		//myRenderCode(currentTime);

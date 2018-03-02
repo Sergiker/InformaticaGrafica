@@ -1,6 +1,8 @@
 #include <imgui\imgui.h>
 #include <imgui\imgui_impl_sdl_gl3.h>
 
+int e = 1;
+
 bool show_test_window = false;
 void GUI() {
 	bool show = true;
@@ -10,6 +12,11 @@ void GUI() {
 	{	
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);//FrameRate
 		
+		//Escollir exercici
+		ImGui::RadioButton("Exercici 1", &e, 1); 
+		ImGui::RadioButton("Exercici 2a", &e, 2); ImGui::SameLine();
+		ImGui::RadioButton("Exercici 2b", &e, 3);
+		ImGui::RadioButton("Exercici 3", &e, 4);
 	}
 	// .........................
 	
