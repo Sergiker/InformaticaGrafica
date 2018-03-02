@@ -1039,7 +1039,6 @@ void main() {\n\
 		if (mov >= 16)
 			mov = 0;
 
-
 		t = glm::translate(glm::mat4(), glm::vec3(0.0f, 3.0f, 0.0f));
 		glm::mat4 esc = glm::scale(glm::mat4(), glm::vec3(yaxis + 2.f, yaxis + 2.f, yaxis + 2.f));
 		glm::mat4 rot = glm::rotate(glm::mat4(), angle, glm::vec3(0.f, 1.f, 0.f));
