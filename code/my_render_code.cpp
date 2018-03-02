@@ -158,7 +158,11 @@ void GLrender(double currentTime, int width, int height) {
 			break;
 
 		case 4:
-			//Dolly effect inverse
+			RV::_modelView = glm::mat4(1.f);
+			RV::_modelView = glm::translate(RV::_modelView, glm::vec3(RV::panv[0], RV::panv[1], (travelling * 3) - 10));
+			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
+			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
+			RV::_projection = glm::perspective(RV::FOV + travelling / 4.f, (float)width / (float)height, RV::zNear, RV::zFar);
 			break;
 	}
 
