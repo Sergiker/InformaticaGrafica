@@ -9,8 +9,13 @@
 
 float travelling = 0;
 extern int e;
-float angle = 0;
+
+//CUSTOM VARS
 float mov = 0;
+int secs = 0;
+float angle = 0;
+
+
 float initialRotZ;
 
 SDL_Event event;
@@ -127,6 +132,9 @@ void GLcleanup() {
 void GLrender(double currentTime, int width, int height) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	const GLfloat multi[] = { (float)sin(currentTime) * 0.5f + 0.25, (float)sin(currentTime) * 0.5f + 0.25, (float)sin(currentTime) * 0.5f + 0.25, 1.0f };
+	glClearBufferfv(GL_COLOR, 0, multi);
+
 	travelling = float(sin(currentTime));
 
 	//ESCOLLIR EXERCICI
@@ -135,10 +143,12 @@ void GLrender(double currentTime, int width, int height) {
 	{
 		case 1:
 			RV::_modelView = glm::mat4(1.f);
-			RV::_modelView = glm::translate(RV::_modelView, glm::vec3(travelling * 4, RV::panv[1], RV::panv[2]));
+			RV::_modelView = glm::translate(RV::_modelView, glm::vec3(/*travelling * 4*/RV::panv[0], RV::panv[1], RV::panv[2]));
 			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
 			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
-			RV::_projection = glm::ortho(-10.f, 10.0f, -10.f, 10.0f, RV::zNear, RV::zFar);
+			RV::_projection = glm::perspective(RV::FOV, (float)width / (float)height, RV::zNear, RV::zFar);
+
+			//RV::_projection = glm::ortho(-10.f, 10.0f, -10.f, 10.0f, RV::zNear, RV::zFar);
 			break;
 
 		case 2:
@@ -291,14 +301,14 @@ void main() {\n\
 		glUseProgram(cubeProgram);
 		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RV::_MVP));
 		// FLOOR
-		glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.6f, 0.6f, 0.6f, 1.f);
+		glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.46f, 0.76f, 0.36f, 1.f);
 		glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_BYTE, 0);
 		// WALLS
-		glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.f, 0.f, 0.f, 1.f);
-		glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_BYTE, (void*)(sizeof(GLubyte) * 4));
-		glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_BYTE, (void*)(sizeof(GLubyte) * 8));
-		glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_BYTE, (void*)(sizeof(GLubyte) * 12));
-		glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_BYTE, (void*)(sizeof(GLubyte) * 16));
+		glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.36f, 0.36f, 0.36f, 1.f);
+		//glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_BYTE, (void*)(sizeof(GLubyte) * 4));
+		//glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_BYTE, (void*)(sizeof(GLubyte) * 8));
+		//glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_BYTE, (void*)(sizeof(GLubyte) * 12));
+		//glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_BYTE, (void*)(sizeof(GLubyte) * 16));
 
 		glUseProgram(0);
 		glBindVertexArray(0);
@@ -540,7 +550,7 @@ void main() {\n\
 		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
 		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
-		glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.1f, 1.f, 1.f, 0.f);
+		glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 1.f, 1.f, 0.f);
 		glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
 		glUseProgram(0);
@@ -558,6 +568,11 @@ void main() {\n\
 
 		glm::mat4 t;
 		glm::mat4 scale;
+		glm::mat4 rot;
+		angle++;
+
+		if (angle == 360)
+			angle = 0;
 
 		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
 		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
@@ -570,12 +585,12 @@ void main() {\n\
 			t = glm::translate(glm::mat4(), glm::vec3(-1.0f, 3.f, -4.5f));
 			scale = glm::scale(glm::mat4(), glm::vec3(3.f, 6.f, 2.f));
 			objMat = t * scale;
-			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.5f, 0.5f, 0.5f, 1.f);
+			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.75f, 0.5f, 0.5f, 1.f);
 			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
 			//FINESTRA 1
-			t = glm::translate(glm::mat4(), glm::vec3(-1.5f, 4.5f, -3.5f));
+			t = glm::translate(glm::mat4(), glm::vec3(-1.5f, 4.75f, -3.5f));
 			scale = glm::scale(glm::mat4(), glm::vec3(0.6f, 0.6f, 0.6f));
 			objMat = t * scale;
 			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.5f, 0.5f, 1.f, 1.f);
@@ -583,7 +598,7 @@ void main() {\n\
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
 			//FINESTRA 2
-			t = glm::translate(glm::mat4(), glm::vec3(-0.5f, 4.5f, -3.5f));
+			t = glm::translate(glm::mat4(), glm::vec3(-0.5f, 4.75f, -3.5f));
 			scale = glm::scale(glm::mat4(), glm::vec3(0.6f, 0.6f, 0.6f));
 			objMat = t * scale;
 			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.5f, 0.5f, 1.f, 1.f);
@@ -591,7 +606,7 @@ void main() {\n\
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
 			//FINESTRA 3
-			t = glm::translate(glm::mat4(), glm::vec3(-1.5f, 3.0f, -3.5f));
+			t = glm::translate(glm::mat4(), glm::vec3(-1.5f, 3.25f, -3.5f));
 			scale = glm::scale(glm::mat4(), glm::vec3(0.6f, 0.6f, 0.6f));
 			objMat = t * scale;
 			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.5f, 0.5f, 1.f, 1.f);
@@ -599,7 +614,7 @@ void main() {\n\
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
 			//FINESTRA 4
-			t = glm::translate(glm::mat4(), glm::vec3(-0.5f, 3.0f, -3.5f));
+			t = glm::translate(glm::mat4(), glm::vec3(-0.5f, 3.25f, -3.5f));
 			scale = glm::scale(glm::mat4(), glm::vec3(0.6f, 0.6f, 0.6f));
 			objMat = t * scale;
 			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.5f, 0.5f, 1.f, 1.f);
@@ -607,7 +622,7 @@ void main() {\n\
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
 			//FINESTRA 5
-			t = glm::translate(glm::mat4(), glm::vec3(-1.5f, 1.5f, -3.5f));
+			t = glm::translate(glm::mat4(), glm::vec3(-1.5f, 1.75f, -3.5f));
 			scale = glm::scale(glm::mat4(), glm::vec3(0.6f, 0.6f, 0.6f));
 			objMat = t * scale;
 			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.5f, 0.5f, 1.f, 1.f);
@@ -615,8 +630,16 @@ void main() {\n\
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
 			//FINESTRA 6
-			t = glm::translate(glm::mat4(), glm::vec3(-0.5f, 1.5f, -3.5f));
+			t = glm::translate(glm::mat4(), glm::vec3(-0.5f, 1.75f, -3.5f));
 			scale = glm::scale(glm::mat4(), glm::vec3(0.6f, 0.6f, 0.6f));
+			objMat = t * scale;
+			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.5f, 0.5f, 1.f, 1.f);
+			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+			//PORTA 1
+			t = glm::translate(glm::mat4(), glm::vec3(-1.0f, 0.5f, -3.5f));
+			scale = glm::scale(glm::mat4(), glm::vec3(0.6f, 1.2f, 0.6f));
 			objMat = t * scale;
 			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.5f, 0.5f, 1.f, 1.f);
 			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
@@ -626,15 +649,15 @@ void main() {\n\
 		//EDIFICI 2
 		{
 			//BLOC 1
-			t = glm::translate(glm::mat4(), glm::vec3(4.0f, 3.f, -2.5f));
+			t = glm::translate(glm::mat4(), glm::vec3(3.0f, 3.f, -2.5f));
 			scale = glm::scale(glm::mat4(), glm::vec3(3.f, 6.f, 2.f));
 			objMat = t * scale;
-			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.5f, 0.5f, 0.5f, 1.f);
+			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.75f, 0.5f, 0.5f, 1.f);
 			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
 			//FINESTRA 1
-			t = glm::translate(glm::mat4(), glm::vec3(3.5f, 4.5f, -1.5f));
+			t = glm::translate(glm::mat4(), glm::vec3(2.5f, 4.75f, -1.5f));
 			scale = glm::scale(glm::mat4(), glm::vec3(0.6f, 0.6f, 0.6f));
 			objMat = t * scale;
 			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.5f, 0.5f, 1.f, 1.f);
@@ -642,7 +665,7 @@ void main() {\n\
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
 			//FINESTRA 2
-			t = glm::translate(glm::mat4(), glm::vec3(4.5f, 4.5f, -1.5f));
+			t = glm::translate(glm::mat4(), glm::vec3(3.5f, 4.75f, -1.5f));
 			scale = glm::scale(glm::mat4(), glm::vec3(0.6f, 0.6f, 0.6f));
 			objMat = t * scale;
 			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.5f, 0.5f, 1.f, 1.f);
@@ -650,7 +673,7 @@ void main() {\n\
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
 			//FINESTRA 3
-			t = glm::translate(glm::mat4(), glm::vec3(3.5f, 3.0f, -1.5f));
+			t = glm::translate(glm::mat4(), glm::vec3(2.5f, 3.25f, -1.5f));
 			scale = glm::scale(glm::mat4(), glm::vec3(0.6f, 0.6f, 0.6f));
 			objMat = t * scale;
 			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.5f, 0.5f, 1.f, 1.f);
@@ -658,7 +681,7 @@ void main() {\n\
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
 			//FINESTRA 4
-			t = glm::translate(glm::mat4(), glm::vec3(4.5f, 3.0f, -1.5f));
+			t = glm::translate(glm::mat4(), glm::vec3(3.5f, 3.25f, -1.5f));
 			scale = glm::scale(glm::mat4(), glm::vec3(0.6f, 0.6f, 0.6f));
 			objMat = t * scale;
 			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.5f, 0.5f, 1.f, 1.f);
@@ -666,7 +689,7 @@ void main() {\n\
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
 			//FINESTRA 5
-			t = glm::translate(glm::mat4(), glm::vec3(3.5f, 1.5f, -1.5f));
+			t = glm::translate(glm::mat4(), glm::vec3(2.5f, 1.75f, -1.5f));
 			scale = glm::scale(glm::mat4(), glm::vec3(0.6f, 0.6f, 0.6f));
 			objMat = t * scale;
 			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.5f, 0.5f, 1.f, 1.f);
@@ -674,8 +697,16 @@ void main() {\n\
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
 			//FINESTRA 6
-			t = glm::translate(glm::mat4(), glm::vec3(4.5f, 1.5f, -1.5f));
+			t = glm::translate(glm::mat4(), glm::vec3(3.5f, 1.75f, -1.5f));
 			scale = glm::scale(glm::mat4(), glm::vec3(0.6f, 0.6f, 0.6f));
+			objMat = t * scale;
+			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.5f, 0.5f, 1.f, 1.f);
+			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+			//PORTA 1
+			t = glm::translate(glm::mat4(), glm::vec3(3.0f, 0.5f, -1.5f));
+			scale = glm::scale(glm::mat4(), glm::vec3(0.6f, 1.2f, 0.6f));
 			objMat = t * scale;
 			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.5f, 0.5f, 1.f, 1.f);
 			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
@@ -708,6 +739,16 @@ void main() {\n\
 			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
+			//FUM
+			{
+				t = glm::translate(glm::mat4(), glm::vec3(-4.0f, 3.f, -0.7f));
+				scale = glm::scale(glm::mat4(), glm::vec3(1.f, 2.f, 1.f));
+				objMat = t * scale;
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.25f, 0.25f, 0.5f, 1.f);
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+			}
+
 			//CAMIO 1
 			t = glm::translate(glm::mat4(), glm::vec3(0.5f, 0.5f, -0.5f));
 			scale = glm::scale(glm::mat4(), glm::vec3(1.f, 1.f, 2.f));
@@ -717,27 +758,27 @@ void main() {\n\
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 		}
 
-		//NÚVOLS
+		//NÚVOL
 		{
 			//NÚVOL 1
-			t = glm::translate(glm::mat4(), glm::vec3(-3.0f, 8.2f, -2.5f));
-			scale = glm::scale(glm::mat4(), glm::vec3(2.f, 1.f, 1.f));
+			t = glm::translate(glm::mat4(), glm::vec3(sin(currentTime) * 1.3f + 3.f, 8.2f, -2.5f));
+			scale = glm::scale(glm::mat4(), glm::vec3(2.3f, 1.2f, 1.4f));
 			objMat = t * scale;
 			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 1.f, 1.f, 1.f);
 			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
 			//NÚVOL 2
-			t = glm::translate(glm::mat4(), glm::vec3(1.0f, 7.2f, 0.f));
-			scale = glm::scale(glm::mat4(), glm::vec3(2.f, 1.f, 1.f));
+			t = glm::translate(glm::mat4(), glm::vec3(-sin(currentTime) / 5.f - 2.f, 6.2f, 0.f));
+			scale = glm::scale(glm::mat4(), glm::vec3(3.3f, 1.f, 1.2f));
 			objMat = t * scale;
 			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 1.f, 1.f, 1.f);
 			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
 			//NÚVOL 3
-			t = glm::translate(glm::mat4(), glm::vec3(4.0f, 7.5f, -5.f));
-			scale = glm::scale(glm::mat4(), glm::vec3(2.f, 1.f, 1.f));
+			t = glm::translate(glm::mat4(), glm::vec3(sin(currentTime) / 3.5f, 7.5f, -5.f));
+			scale = glm::scale(glm::mat4(), glm::vec3(2.1f, 1.3f, 1.6f));
 			objMat = t * scale;
 			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 1.f, 1.f, 1.f);
 			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
@@ -745,20 +786,237 @@ void main() {\n\
 
 		}
 
-		//CUBE_UNIQUE
+		//SOL / LLUNA
 		{
-		glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.15f, 1.f, 0.15f, 1.f);
-		t = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.5f, 3.30f));
-		/*glm::mat4 esc = glm::scale(glm::mat4(), glm::vec3(yaxis + 2.f, yaxis + 2.f, yaxis + 2.f));
-		glm::mat4 rot = glm::rotate(glm::mat4(), angle, glm::vec3(0.f, 1.f, 0.f));
-		glm::mat4 t2 = glm::translate(glm::mat4(), glm::vec3(yaxis * 2 + 2, yaxis * 2 + 2, yaxis * 2 + 2));
-		glm::mat4 tmov = glm::translate(glm::mat4(), glm::vec3(mov * 3, 0.f, 0.f));*/
+			//SOL
+			{
+				t = glm::translate(glm::mat4(), glm::vec3(-10.f, -(sin(currentTime) * 3.3f) + 15.f, -2.5f));
+				scale = glm::scale(glm::mat4(), glm::vec3(3.25f, 3.25f, 1.f));
+				objMat = t * scale;
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 0.7f, 0.f, 1.f);
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
-		objMat = t /** tmov * rot * t2 * esc*/;
+				//PALITO 1
+				t = glm::translate(glm::mat4(), glm::vec3(-10.f, -(sin(currentTime) * 3.3f) + 17.f, -2.5f));
+				scale = glm::scale(glm::mat4(), glm::vec3(1.f, 2.5f, 1.f));
+				objMat = t * scale;
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 0.7f, 0.f, 1.f);
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
-		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
-		glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+				//PALITO 2
+				t = glm::translate(glm::mat4(), glm::vec3(-10.f, -(sin(currentTime) * 3.3f) + 13.f, -2.5f));
+				scale = glm::scale(glm::mat4(), glm::vec3(1.f, 2.5f, 1.f));
+				objMat = t * scale;
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 0.7f, 0.f, 1.f);
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+				//PALITO 3
+				t = glm::translate(glm::mat4(), glm::vec3(-12.f, -(sin(currentTime) * 3.3f) + 15.f, -2.5f));
+				scale = glm::scale(glm::mat4(), glm::vec3(2.5f, 1.f, 1.f));
+				objMat = t * scale;
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 0.7f, 0.f, 1.f);
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+				//PALITO 4
+				t = glm::translate(glm::mat4(), glm::vec3(-8.f, -(sin(currentTime) * 3.3f) + 15.f, -2.5f));
+				scale = glm::scale(glm::mat4(), glm::vec3(2.5f, 1.f, 1.f));
+				objMat = t * scale;
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 0.7f, 0.f, 1.f);
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+				//PALITO 5
+				t = glm::translate(glm::mat4(), glm::vec3(-8.5f, -(sin(currentTime) * 3.3f) + 16.5f, -2.5f));
+				scale = glm::scale(glm::mat4(), glm::vec3(1.f, 1.f, 1.f));
+				rot = glm::rotate(glm::mat4(), -45.f, glm::vec3(0.f, 0.f, 1.f));
+				objMat = t * rot * scale;
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 0.7f, 0.f, 1.f);
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+				//PALITO 6
+				t = glm::translate(glm::mat4(), glm::vec3(-8.5f, -(sin(currentTime) * 3.3f) + 13.5f, -2.5f));
+				scale = glm::scale(glm::mat4(), glm::vec3(1.f, 1.f, 1.f));
+				rot = glm::rotate(glm::mat4(), 45.f, glm::vec3(0.f, 0.f, 1.f));
+				objMat = t * rot * scale;
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 0.7f, 0.f, 1.f);
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+				//PALITO 7
+				t = glm::translate(glm::mat4(), glm::vec3(-11.5f, -(sin(currentTime) * 3.3f) + 16.5f, -2.5f));
+				scale = glm::scale(glm::mat4(), glm::vec3(1.f, 1.f, 1.f));
+				rot = glm::rotate(glm::mat4(), 45.f, glm::vec3(0.f, 0.f, 1.f));
+				objMat = t * rot * scale;
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 0.7f, 0.f, 1.f);
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+				//PALITO 8
+				t = glm::translate(glm::mat4(), glm::vec3(-11.5f, -(sin(currentTime) * 3.3f) + 13.5f, -2.5f));
+				scale = glm::scale(glm::mat4(), glm::vec3(1.f, 1.f, 1.f));
+				rot = glm::rotate(glm::mat4(), -45.f, glm::vec3(0.f, 0.f, 1.f));
+				objMat = t * rot * scale;
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 0.7f, 0.f, 1.f);
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+			}
+			//LLUNA
+			{
+				t = glm::translate(glm::mat4(), glm::vec3(10.f, sin(currentTime) * 3.3f + 15.f, -2.5f));
+				scale = glm::scale(glm::mat4(), glm::vec3(2.f, 3.f, 1.f));
+				objMat = t * scale;
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 1.f, 0.f, 1.f);
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+				t = glm::translate(glm::mat4(), glm::vec3(11.f, sin(currentTime) * 3.3f + 16.f, -2.5f));
+				scale = glm::scale(glm::mat4(), glm::vec3(3.f, 1.f, 1.f));
+				objMat = t * scale;
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 1.f, 0.f, 1.f);
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+				t = glm::translate(glm::mat4(), glm::vec3(11.f, sin(currentTime) * 3.3f + 14.f, -2.5f));
+				scale = glm::scale(glm::mat4(), glm::vec3(3.f, 1.f, 1.f));
+				objMat = t * scale;
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 1.f, 0.f, 1.f);
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+			}
+			
 		}
+
+		//CAR
+		{		
+			if (mov >= 8)
+			{
+				mov = -1;
+				secs = 90;
+			}
+				
+			if (secs != 0)
+				secs--;
+
+			else
+				mov += (0.15);
+
+			if (secs == 0)
+			{
+				//BIG CUBE
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 1.f, 0.15f, 1.f);
+				t = glm::translate(glm::mat4(), glm::vec3(-4.0f + mov, 0.55f, 3.30f));
+				scale = glm::scale(glm::mat4(), glm::vec3(1.f, 0.75f, 1.f));
+				/*glm::mat4 esc = glm::scale(glm::mat4(), glm::vec3(yaxis + 2.f, yaxis + 2.f, yaxis + 2.f));
+				glm::mat4 rot = glm::rotate(glm::mat4(), angle, glm::vec3(0.f, 1.f, 0.f));
+				glm::mat4 t2 = glm::translate(glm::mat4(), glm::vec3(yaxis * 2 + 2, yaxis * 2 + 2, yaxis * 2 + 2));
+				glm::mat4 tmov = glm::translate(glm::mat4(), glm::vec3(mov * 3, 0.f, 0.f));*/
+				objMat = t * scale/** tmov * rot * t2 * esc*/;
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+				//SMALL CUBE
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 1.f, 1.f, 0.15f, 1.f);
+				t = glm::translate(glm::mat4(), glm::vec3(-3.25f + mov, 0.45f, 3.30f));
+				scale = glm::scale(glm::mat4(), glm::vec3(0.75f, 0.55f, 1.f));
+				objMat = t * scale;
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+				//WHEEL 1
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.f, 0.f, 0.f, 1.f);
+				t = glm::translate(glm::mat4(), glm::vec3(-3.20f + mov, 0.25f, 3.70f));
+				scale = glm::scale(glm::mat4(), glm::vec3(0.35f, 0.35f, 0.35f));
+				objMat = t * scale;
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+				//WHEEL 2
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.f, 0.f, 0.f, 1.f);
+				t = glm::translate(glm::mat4(), glm::vec3(-4.25f + mov, 0.25f, 3.70f));
+				scale = glm::scale(glm::mat4(), glm::vec3(0.35f, 0.35f, 0.35f));
+				objMat = t * scale;
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+				//WHEEL 3
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.f, 0.f, 0.f, 1.f);
+				t = glm::translate(glm::mat4(), glm::vec3(-3.20f + mov, 0.25f, 2.90f));
+				scale = glm::scale(glm::mat4(), glm::vec3(0.35f, 0.35f, 0.35f));
+				objMat = t * scale;
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+				//WHEEL 4
+				glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.f, 0.f, 0.f, 1.f);
+				t = glm::translate(glm::mat4(), glm::vec3(-4.25f + mov, 0.25f, 2.90f));
+				scale = glm::scale(glm::mat4(), glm::vec3(0.35f, 0.35f, 0.35f));
+				objMat = t * scale;
+				glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+			}
+			
+		}
+
+		//TRACK
+		{
+			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.25f, 0.25f, 0.25f, 1.f);
+			t = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.05f, 3.0f));
+			scale = glm::scale(glm::mat4(), glm::vec3(10.f, 0.1f, 3.2f));
+
+			objMat = t * scale;
+
+			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+		}
+
+		//STEPS
+		{
+			//STEP 1
+			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.95f, 0.95f, 0.95f, 1.f);
+			t = glm::translate(glm::mat4(), glm::vec3(-4.0f, 0.10f, 3.0f));
+			scale = glm::scale(glm::mat4(), glm::vec3(1.5f, 0.1f, 0.2f));
+			objMat = t * scale;
+			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+			//STEP 2
+			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.95f, 0.95f, 0.95f, 1.f);
+			t = glm::translate(glm::mat4(), glm::vec3(-2.0f, 0.10f, 3.0f));
+			scale = glm::scale(glm::mat4(), glm::vec3(1.5f, 0.1f, 0.2f));
+			objMat = t * scale;
+			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+			//STEP 3
+			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.95f, 0.95f, 0.95f, 1.f);
+			t = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.10f, 3.0f));
+			scale = glm::scale(glm::mat4(), glm::vec3(1.5f, 0.1f, 0.2f));
+			objMat = t * scale;
+			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+			//STEP 4
+			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.95f, 0.95f, 0.95f, 1.f);
+			t = glm::translate(glm::mat4(), glm::vec3(2.0f, 0.10f, 3.0f));
+			scale = glm::scale(glm::mat4(), glm::vec3(1.5f, 0.1f, 0.2f));
+			objMat = t * scale;
+			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+			//STEP 5
+			glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.95f, 0.95f, 0.95f, 1.f);
+			t = glm::translate(glm::mat4(), glm::vec3(4.0f, 0.10f, 3.0f));
+			scale = glm::scale(glm::mat4(), glm::vec3(1.5f, 0.1f, 0.2f));
+			objMat = t * scale;
+			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+		}
+
 
 		glUseProgram(0);
 		glBindVertexArray(0);
