@@ -143,12 +143,10 @@ void GLrender(double currentTime, int width, int height) {
 	{
 		case 1:
 			RV::_modelView = glm::mat4(1.f);
-			RV::_modelView = glm::translate(RV::_modelView, glm::vec3(/*travelling * 4*/RV::panv[0], RV::panv[1], RV::panv[2]));
+			RV::_modelView = glm::translate(RV::_modelView, glm::vec3(travelling * 4 * RV::panv[0], RV::panv[1], RV::panv[2]));
 			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
 			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
-			RV::_projection = glm::perspective(RV::FOV, (float)width / (float)height, RV::zNear, RV::zFar);
-
-			//RV::_projection = glm::ortho(-10.f, 10.0f, -10.f, 10.0f, RV::zNear, RV::zFar);
+			RV::_projection = glm::ortho(-10.f, 10.0f, -10.f, 10.0f, RV::zNear, RV::zFar);
 			break;
 
 		case 2:

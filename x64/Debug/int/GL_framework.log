@@ -1,5 +1,5 @@
 ﻿  my_render_code.cpp
 d:\data\universitat\3er any\informàtica gràfica\cube\glframework_starthere\informaticagrafica\code\my_render_code.cpp(135): warning C4838: la conversión de 'double' en 'const GLfloat' requiere una conversión de restricción
 d:\data\universitat\3er any\informàtica gràfica\cube\glframework_starthere\informaticagrafica\code\my_render_code.cpp(135): warning C4244: 'inicializando': conversión de 'double' a 'const GLfloat'; posible pérdida de datos
-d:\data\universitat\3er any\informàtica gràfica\cube\glframework_starthere\informaticagrafica\code\my_render_code.cpp(906): warning C4305: '+=': truncamiento de 'double' a 'float'
+d:\data\universitat\3er any\informàtica gràfica\cube\glframework_starthere\informaticagrafica\code\my_render_code.cpp(904): warning C4305: '+=': truncamiento de 'double' a 'float'
   GL_framework.vcxproj -> D:\DATA\Universitat\3er Any\Informàtica gràfica\Cube\glframework_starthere\InformaticaGrafica\x64\Debug\GL_framework.exe
