@@ -1,7 +1,7 @@
 #include <imgui\imgui.h>
 #include <imgui\imgui_impl_sdl_gl3.h>
 
-int e = 1;
+int e = 4;
 
 bool show_test_window = false;
 void GUI() {

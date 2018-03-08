@@ -62,6 +62,7 @@ namespace RenderVars {
 
 	glm::mat4 _projection;
 	glm::mat4 _modelView;
+	glm::mat4 _lookAt;
 	glm::mat4 _MVP;
 	glm::mat4 _inv_modelview;
 	glm::vec4 _cameraPoint;
@@ -147,6 +148,7 @@ void GLrender(double currentTime, int width, int height) {
 			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
 			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
 			RV::_projection = glm::ortho(-10.f, 10.0f, -10.f, 10.0f, RV::zNear, RV::zFar);
+			RV::_MVP = RV::_projection * RV::_modelView;
 			break;
 
 		case 2:
@@ -155,6 +157,7 @@ void GLrender(double currentTime, int width, int height) {
 			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
 			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
 			RV::_projection = glm::perspective(RV::FOV, (float)width / (float)height, RV::zNear, RV::zFar);
+			RV::_MVP = RV::_projection * RV::_modelView;
 			break;
 
 		case 3:
@@ -162,24 +165,19 @@ void GLrender(double currentTime, int width, int height) {
 			RV::_modelView = glm::translate(RV::_modelView, glm::vec3(RV::panv[0], RV::panv[1], RV::panv[2]));
 			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
 			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
-			RV::_projection = glm::perspective(RV::FOV + travelling/2, (float)width / (float)height, RV::zNear, RV::zFar);
+			RV::_projection = glm::perspective(RV::FOV + (travelling/2), (float)width / (float)height, RV::zNear, RV::zFar);
+			RV::_MVP = RV::_projection * RV::_modelView;
 			break;
 
 		case 4:
 			RV::_modelView = glm::mat4(1.f);
-			RV::_modelView = glm::translate(RV::_modelView, glm::vec3(RV::panv[0], RV::panv[1], (travelling * 3) - 10));
-			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
-			RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
-			RV::_projection = glm::perspective(RV::FOV + travelling / 4.f, (float)width / (float)height, RV::zNear, RV::zFar);
+			RV::_modelView = glm::translate(RV::_modelView, glm::vec3(RV::panv[0], RV::panv[1], RV::panv[2]));
+			RV::_projection = glm::perspective(RV::FOV - (travelling/2.f), (float)width / (float)height, RV::zNear, RV::zFar);
+			//LOOK AT
+			RV::_lookAt = glm::lookAt(glm::vec3(0.f, 3.0f, (travelling * 1.1f) + 15), glm::vec3(0.f, 4.f, 6.f), glm::vec3(0.f, 1.f, 0.f));
+			RV::_MVP = RV::_projection * RV::_lookAt;
 			break;
 	}
-
-
-	//LOOK AT
-	//RV::_modelView = glm::lookAt(glm::vec3(0.0f, 2.0f, 10.0f), glm::vec3(mov, 0.f, 0.f), glm::vec3(0.2f, 1.0f, 0.3f));
-
-
-	RV::_MVP = RV::_projection * RV::_modelView;
 
 	Box::drawCube();
 	Axis::drawAxis();
@@ -1015,6 +1013,15 @@ void main() {\n\
 			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 		}
 
+		//DOLLY CUBE
+		{
+			//CUBE
+			t = glm::translate(glm::mat4(), glm::vec3(0.f, 3.f, 12.f));
+			objMat = t;
+			glUniform4f(glGetUniformLocation(cubeProgram, "color"), sin(currentTime), cos(currentTime), tan(currentTime), 1.f);
+			glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+			glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+		}
 
 		glUseProgram(0);
 		glBindVertexArray(0);
